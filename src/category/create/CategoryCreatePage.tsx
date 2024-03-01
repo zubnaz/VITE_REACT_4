@@ -3,7 +3,7 @@ import { ICategoryCreate, IUploadedFile } from "./types.ts";
 import { Button, Form, Input, Row, Upload } from "antd";
 import { Link } from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
-import { UploadChangeParam } from "antd/es/upload";
+import { UploadChangeParam, UploadFile } from "antd/es/upload";
 import { PlusOutlined } from '@ant-design/icons';
 import http_common from "../../http_common.ts";
 
@@ -71,8 +71,10 @@ const CategoryCreatePage = () => {
                         label="Фото"
                         valuePropName="image"
                         getValueFromEvent={(e: UploadChangeParam) => {
-                            const image = e?.fileList[0] as IUploadedFile;
-                            return image?.originFileObj;
+                            console.log(e?.fileList);
+                            const fileList = e?.fileList as UploadFile[];
+                            const files: File[] = fileList.map(file => file.originFileObj);
+                            return files;
                         }}
                         rules={[{ required: true, message: 'Оберіть фото категорії!' }]}
                     >
@@ -81,7 +83,7 @@ const CategoryCreatePage = () => {
                             beforeUpload={() => false}
                             accept="image/*"
                             listType="picture-card"
-                            maxCount={1}
+                            maxCount={7}
                         >
                             <div>
                                 <PlusOutlined />

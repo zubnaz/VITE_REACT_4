@@ -1,0 +1,8 @@
+div.custom-style {
+    background: rgb(228, 225, 225);
+    padding: 30px;
+}
+
+.slick-dots li button {
+    background: black !important;
+}
