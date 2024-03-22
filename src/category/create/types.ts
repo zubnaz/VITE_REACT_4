@@ -1,6 +1,6 @@
 export interface ICategoryCreate {
     name: string;
-    image: File[] | undefined;
+    image: File | undefined;
     description: string;
 }
 export interface IUploadedFile {

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ICategoryCreate, IUploadedFile } from "./types.ts";
-import { Button, Form, Input, Row, Upload } from "antd";
+import {Button, Form, FormProps, Input, Row, Upload} from "antd";
 import { Link } from "react-router-dom";
 import TextArea from "antd/es/input/TextArea";
 import { UploadChangeParam, UploadFile } from "antd/es/upload";
@@ -11,9 +11,9 @@ const CategoryCreatePage = () => {
     const navigate = useNavigate();
 
     const [form] = Form.useForm<ICategoryCreate>();
-
-    const onHandlerSubmit = async (values: ICategoryCreate) => {
+    const onFinish: FormProps<ICategoryCreate>["onFinish"] = async (values) => {
         try {
+
             await http_common.post("/api/categories/create", values, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -24,14 +24,15 @@ const CategoryCreatePage = () => {
         catch (ex) {
             console.log("Exception create category", ex);
         }
-    }
+    };
+
 
     return (
         <>
             <h1>Додати категорію</h1>
             <Row gutter={16}>
                 <Form form={form}
-                    onFinish={onHandlerSubmit}
+                    onFinish={onFinish}
                     layout={"vertical"}
                     style={{
                         minWidth: '100%',
@@ -71,10 +72,9 @@ const CategoryCreatePage = () => {
                         label="Фото"
                         valuePropName="image"
                         getValueFromEvent={(e: UploadChangeParam) => {
-                            console.log(e?.fileList);
-                            const fileList = e?.fileList as UploadFile[];
-                            const files: File[] = fileList.map(file => file.originFileObj);
-                            return files;
+                            console.log(e?.file);
+                            const _file = e?.file;
+                            return _file;
                         }}
                         rules={[{ required: true, message: 'Оберіть фото категорії!' }]}
                     >
@@ -83,7 +83,7 @@ const CategoryCreatePage = () => {
                             beforeUpload={() => false}
                             accept="image/*"
                             listType="picture-card"
-                            maxCount={7}
+                            maxCount={1}
                         >
                             <div>
                                 <PlusOutlined />
@@ -92,16 +92,17 @@ const CategoryCreatePage = () => {
                         </Upload>
                     </Form.Item>
 
-                    <Row style={{ display: 'flex', justifyContent: 'center' }}>
-                        <Button style={{ margin: 10 }} type="primary" htmlType="submit">
-                            Додати
+                        <Row style={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button  style={{ margin: 10 }} type="primary" htmlType="submit">
+                            Створити
                         </Button>
-                        <Link to={"/"}>
+                        <Link to={"/admin"}>
                             <Button style={{ margin: 10 }} htmlType="button">
                                 Скасувати
                             </Button>
                         </Link>
                     </Row>
+
                 </Form>
             </Row>
         </>

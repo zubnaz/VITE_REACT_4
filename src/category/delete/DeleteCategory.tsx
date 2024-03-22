@@ -10,7 +10,7 @@ export default function DeleteCategory() {
     };
 
     const exit = async () => {
-        await navigate(-1);
+        await navigate('/admin');
     };
 
     useEffect(() => {

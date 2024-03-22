@@ -2,7 +2,7 @@ export interface ICategoryShow {
     id: number,
     name: string,
     description: string,
-    images: IPhoto[]
+    image: string
 }
 export interface IPhoto {
     id: number,

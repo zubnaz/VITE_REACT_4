@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Input, Row, Upload, UploadFile } from "antd";
+import {Link, useNavigate, useParams} from "react-router-dom";
+import {Button, Form, FormProps, Input, Row, Upload, UploadFile} from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { UploadChangeParam } from "antd/es/upload";
 import { PlusOutlined } from "@ant-design/icons";
@@ -13,18 +13,25 @@ const CategoryEditPage = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [form] = Form.useForm<ICategoryEdit>();
-    const [file, setFiles] = useState<UploadFile[] | null>([]);
+    const [file, setFile] = useState<UploadFile|null>();
 
-    const onSubmit = async (values: ICategoryEdit) => {
+    const onFinish: FormProps<ICategoryEdit>["onFinish"] = async (values) => {
 
         console.log(values);
+        const category:ICategoryEdit={
+            id:id,
+            name:values.name,
+            description:values.description,
+            image:values.image
+        }
+
         try {
-            await http_common.put("/api/categories/edit", values, {
+            await http_common.put("/api/categories/edit", category, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            navigate('/');
+            navigate('/admin');
         } catch (ex) {
             console.log("Exception create category", ex);
         }
@@ -36,14 +43,13 @@ const CategoryEditPage = () => {
                 const { data } = resp;
                 form.setFieldsValue(data);
 
-                const imgs = data.images.map((photo) => ({
-
-                    uid: `${photo.id}`,
-                    name: photo.name,
-                    status: 'done',
-                    url: `/uploading/300_${photo.name}`
-                }));
-                setFiles(imgs);
+                setFile(
+                    {
+                        uid: '-1',
+                        name: data.image,
+                        status: 'done',
+                        url: `/uploading/300_${data.image}`,
+                    });
 
 
             })
@@ -58,15 +64,15 @@ const CategoryEditPage = () => {
             <h1>Редагування категорію</h1>
             <Row gutter={16}>
                 <Form form={form}
-                    onFinish={onSubmit}
-                    layout={"vertical"}
-                    style={{
-                        minWidth: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        padding: 20,
-                    }}
+                      onFinish={onFinish}
+                      layout={"vertical"}
+                      style={{
+                          minWidth: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          padding: 20,
+                      }}
                 >
                     <Form.Item
                         name="id"
@@ -78,11 +84,10 @@ const CategoryEditPage = () => {
                         name="name"
                         htmlFor="name"
                         rules={[
-                            { required: true, message: 'Це поле є обов\'язковим!' },
-                            { min: 3, message: 'Назва повинна містити мінімум 3 символи!' },
+                            {min: 3, message: 'Назва повинна містити мінімум 3 символи!'},
                         ]}
                     >
-                        <Input autoComplete="name" />
+                        <Input autoComplete="name"/>
                     </Form.Item>
 
                     <Form.Item
@@ -90,11 +95,10 @@ const CategoryEditPage = () => {
                         name="description"
                         htmlFor="description"
                         rules={[
-                            { required: true, message: 'Це поле є обов\'язковим!' },
-                            { min: 10, message: 'Опис повинен містити мінімум 10 символів!' },
+                            {min: 10, message: 'Опис повинен містити мінімум 10 символів!'},
                         ]}
                     >
-                        <TextArea />
+                        <TextArea/>
                     </Form.Item>
 
                     <Form.Item
@@ -102,40 +106,33 @@ const CategoryEditPage = () => {
                         label="Фото"
                         valuePropName="file"
                         getValueFromEvent={(e: UploadChangeParam) => {
-                            const fileList = file as UploadFile[];
-                            console.log("Files : " + fileList)
-                            const files: File[] = fileList.map(file => file.originFileObj);
-                            console.log("Files 2 : " + fileList)
-                            return files;
+                            const image = e?.fileList[0] as IUploadedFile;
+                            return image?.originFileObj;
                         }}
                     >
                         <Upload
-                            showUploadList={{ showPreviewIcon: false }}
+                            showUploadList={{showPreviewIcon: false}}
                             beforeUpload={() => false}
                             accept="image/*"
                             listType="picture-card"
-                            maxCount={7}
-                            fileList={file}
+                            maxCount={1}
+                            fileList={file ? [file] : []}
                             onChange={(data) => {
-                                console.log(data.fileList);
-                                const newFiles = data.fileList.filter(file => file.status === 'done'); // Фільтруємо файли, щоб відфільтрувати тільки завантажені
-                                if (file !== null) {
-                                    setFiles(prevFiles => [...prevFiles, ...newFiles]); // Додаємо нові файли до попередніх
-                                }
+                                setFile(data.fileList[0]);
                             }}
 
                         >
                             <div>
-                                <PlusOutlined />
-                                <div style={{ marginTop: 8 }}>Обрати нове фото</div>
+                                <PlusOutlined/>
+                                <div style={{marginTop: 8}}>Обрати нове фото</div>
                             </div>
                         </Upload>
                     </Form.Item>
-                    <Row style={{ display: 'flex', justifyContent: 'center' }}>
-                        <Button style={{ margin: 10 }} type="primary" htmlType="submit">
+                    <Row style={{display: 'flex', justifyContent: 'center'}}>
+                        <Button style={{margin: 10}} type="primary" htmlType="submit">
                             Зберегти
                         </Button>
-                        <Button style={{ margin: 10 }} htmlType="button" onClick={() => {
+                        <Button style={{margin: 10}} htmlType="button" onClick={() => {
                             navigate('/')
                         }}>
                             Скасувати

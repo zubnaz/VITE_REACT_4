@@ -1,5 +1,8 @@
 import { Button, Layout, Menu } from 'antd';
 import { Link, useLocation } from 'react-router-dom';
+import {deleteLocalStorage, getLocalStorage} from "../../utils/storage/localStorageUtils.ts";
+import {isAdmin} from "../../utils/storage/isAdmin.ts";
+import {isTokenActive} from "../../utils/storage/isTokenActive.ts";
 
 const { Header } = Layout;
 
@@ -31,15 +34,27 @@ const DefaultHeader = () => {
                         <Link to={`/${item.link}`}>{item.label}</Link>
                     </Menu.Item>
                 ))}
+                {!isAdmin(getLocalStorage('authToken')) ? "" : <Menu.Item>
+                    <Link to={`/admin`}>Admin Panel</Link>
+                </Menu.Item>
+                }
+
             </Menu>
 
             <>
-                <Link to={"/login"}>
+                {!isTokenActive(getLocalStorage('authToken')) ? "" : <Button style={ButtonStyle} onClick={()=>{
+                    deleteLocalStorage('authToken')
+                    window.location.reload();
+                }}>
+                    Exit
+                </Button>
+                }
+                <Link to={"account/login"}>
                     <Button style={ButtonStyle}>
                         Sign-In
                     </Button>
                 </Link>
-                <Link to={"/register"}>
+                <Link to={"account/register"}>
                     <Button>Register</Button>
                 </Link>
             </>

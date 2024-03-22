@@ -1,9 +1,8 @@
-import { Button, Card, Carousel, Col, Popconfirm, Typography } from "antd";
-import NotImage from '../../assets/imagenot.png';
+import {Button, Card, Col, Popconfirm, Row, Typography} from "antd";
 import Meta from "antd/es/card/Meta";
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Link } from "react-router-dom";
-import { ICategoryShow, IPhoto } from "./ICategoryShow.ts";
+import {Link, Route} from "react-router-dom";
+import { ICategoryShow } from "./ICategoryShow.ts";
 import './cardStyle.css';
 const { Title } = Typography;
 
@@ -14,13 +13,13 @@ interface ICategoryCardProps {
 
 const CategoryCard: React.FC<ICategoryCardProps> = (props) => {
     const { item, handleDelete } = props;
-    const { id, name, description, images } = item;
-
-    const divStyle = {
+    //const { id, name, description, images } = item;
+    const { id, name, description,image } = item;
+    /*const divStyle = {
         background: "black",
         padding: "30px"
-    }
-
+    }*/
+    console.log(image);
     return (
         <>
             <Col style={{ padding: 10 }} xxl={6} lg={8} md={12} sm={12}>
@@ -29,28 +28,17 @@ const CategoryCard: React.FC<ICategoryCardProps> = (props) => {
                     style={{ height: 350, display: 'flex', flexDirection: 'column', paddingTop: '40px' }}
                     hoverable
                     cover={
-                        <Carousel className="carousel">
 
-                            {images ? images.map((element: IPhoto) => (
-                                <div key={element.id} className="custom-style">
-                                    <img
-                                        style={{ height: '120px', objectFit: 'contain', margin: 'auto' }}
-                                        alt={element.name}
-                                        src={element.name ? `/uploading/300_${element.name}` : NotImage}
-                                    />
-                                </div>
-
-                            )) : null}
-
-                        </Carousel>
+                        <img style={{width:70,height:100,margin:"auto"}} src={`/uploading/300_${image}`}/>
                     }
-                    actions={[
-                        <Link to={`/category/edit/${id}`}>
+                    actions={[window.location.pathname=="/admin"?
+                        <div style={{display:"flex",flexDirection:"row"}}>
+                        <Link to={`category/edit/${id}`}>
 
                             <Button type="primary" icon={<EditOutlined />}>
-                                Змінить
+                                Змінити
                             </Button>
-                        </Link>,
+                        </Link>
 
                         <Popconfirm
                             title="Are you sure to delete this category?"
@@ -58,13 +46,13 @@ const CategoryCard: React.FC<ICategoryCardProps> = (props) => {
                             okText="Yes"
                             cancelText="No"
                         >
-                            <Link to={`/category/delete/${id}`}>
+                            <Link to={`category/delete/${id}`}>
                                 <Button icon={<DeleteOutlined />}>
                                     Delete
                                 </Button>
                             </Link>
-                        </Popconfirm>
-                    ]}
+                        </Popconfirm></div>
+                        :""]}
                 >
 
                     <Meta

@@ -1,12 +1,15 @@
-import { Button, Col, Form, Input, Pagination, Row } from "antd";
+import {Button, Col, Empty, Form, Input, Pagination, Row} from "antd";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import http_common from "../../http_common";
 import CategoryCard from "./CategoryCard";
 import { ICategorySearch, IGetCategories } from "./IGetCategories";
+import {getLocalStorage} from "../../utils/storage/localStorageUtils.ts";
+import {isTokenActive} from "../../utils/storage/isTokenActive.ts";
+import {DeleteOutlined} from "@ant-design/icons";
 
 const CategoryListPage = () => {
-    const path = `/uploading/150_`;
+    //const path = `/uploading/150_`;
     //const [dataSource, setDataSource] = useState<any>([]);
     const [data, setData] = useState<IGetCategories>({
         content: [],
@@ -27,14 +30,13 @@ const CategoryListPage = () => {
 
     const { content, totalElements } = data; // витягуємо content, totalElements з об'єкта data
     const uploadData = async () => {
-        http_common.get<IGetCategories>("http://localhost:8080/api/categories/search", {
+        http_common.get<IGetCategories>("/api/categories/search", {
             params: {
                 ...formParams,
                 page: formParams.page - 1
             } // передаємо параметри для запиту
         })
             .then(resp => {
-                console.log("Items", resp.data);
                 setData(resp.data);
                 form.setFieldsValue(formParams);// записуємо дані в інпути
             });
@@ -103,21 +105,28 @@ const CategoryListPage = () => {
     return (
         <>
             <h1>Список категорій</h1>
-            <Link to={"/category/create"}>
-                <Button style={{ margin: '13px' }} size={"large"}>Додати</Button>
-            </Link>
 
-            <Row gutter={16} >
+            {!isTokenActive(getLocalStorage('authToken'))?(<Empty description={"Потрібна аутентифікація!"}></Empty> ):(<><Row gutter={16} >
+                {window.location.pathname=="/admin"?<>
+                <Link to={`category/create`}>
+                    <Button style={{margin:20}} type="primary">
+                        Створити категорію
+                    </Button>
+                </Link>
+                </>
+                :
+                    ""
+                }
                 <Form form={form} onFinish={onSubmit} layout={"vertical"}
-                    style={{
-                        minWidth: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'start',
-                        padding: 20,
-                        rowGap: 5
+                      style={{
+                          minWidth: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'start',
+                          padding: 20,
+                          rowGap: 5
 
-                    }}
+                      }}
                 >
                     <Form.Item
 
@@ -155,33 +164,35 @@ const CategoryListPage = () => {
                 </Form>
             </Row>
 
-            <Row gutter={16}>
-                <Col span={24}>
-                    <Row>
-                        {content.length === 0 ? (
-                            <h2>Список пустий</h2>
-                        ) : (
-                            content.map((item: any) =>
-                                <CategoryCard key={item.id} item={item} handleDelete={handleDelete} />,
-                            )
-                        )}
-                    </Row>
-                </Col>
+                <Row gutter={16}>
+        <Col span={24}>
+            <Row>
+                {content.length === 0 ? (
+                    <h2>Список пустий</h2>
+                ) : (
+                    content.map((item: any) =>
+                        <CategoryCard key={item.id} item={item} handleDelete={handleDelete} />,
+                    )
+                )}
             </Row>
-            <Row style={{ width: '100%', display: 'flex', marginTop: '25px', justifyContent: 'center' }}>
-                <Pagination
-                    showTotal={(total, range) => {
-                        console.log("range ", range);
-                        return (`${range[0]}-${range[1]} із ${total} записів`);
-                    }}
-                    current={formParams.page}
-                    defaultPageSize={formParams.size}
-                    total={totalElements}
-                    onChange={handlePageChange}
-                    pageSizeOptions={[1, 2, 5, 10]}
-                    showSizeChanger
-                />
-            </Row>
+        </Col>
+        </Row>
+    <Row style={{ width: '100%', display: 'flex', marginTop: '25px', justifyContent: 'center' }}>
+        <Pagination
+            showTotal={(total, range) => {
+                console.log("range ", range);
+                return (`${range[0]}-${range[1]} із ${total} записів`);
+            }}
+            current={formParams.page}
+            defaultPageSize={formParams.size}
+            total={totalElements}
+            onChange={handlePageChange}
+            pageSizeOptions={[1, 2, 5, 10]}
+            showSizeChanger
+        />
+    </Row>
+    </>)}
+
         </>
     )
 }
